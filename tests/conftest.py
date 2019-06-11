@@ -6,16 +6,14 @@ from prs_lib import PRS
 import prs_utility as utility
 
 
-# @pytest.fixture(params=['dev', 'beta', 'prod'])
-@pytest.fixture(params=['beta', ])
+@pytest.fixture(params=['dev', 'beta', 'prod'])
 def client_without_auth(request):
     print('request.param:', request.param)
     client = PRS({'env': request.param, 'debug': True})
     yield client
 
 
-# @pytest.fixture(params=['dev', 'beta', 'prod'])
-@pytest.fixture(params=['beta', ])
+@pytest.fixture(params=['dev', 'beta', 'prod'])
 def client_with_auth(request):
     print('request.param:', request.param)
     if request.param == 'dev':
@@ -41,7 +39,7 @@ def client_with_auth(request):
     yield client
 
 
-@pytest.fixture(params=['beta', ])
+@pytest.fixture(params=['dev', 'beta', 'prod'])
 def client_buyer(request):
     private_key = utility.recover_private_key(
         BUYER['keystore'], BUYER['password']

@@ -31,6 +31,7 @@ clean-build:
 	rm -fr build/
 	rm -fr dist/
 	rm -fr *.egg-info
+	rm -rf .pytest_cache .coverage
 
 clean-pyc:
 	@echo "clean pyc"

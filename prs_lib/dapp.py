@@ -84,7 +84,7 @@ class Dapp:
             data['logo'] = dapp['logo']
         return request(
             self.config.host,
-            method='POST',
+            method='PUT',
             path=f'/apps/{address}',
             data=data,
             auth_opts=self.config.get_auth_opts(),
@@ -98,8 +98,8 @@ class Dapp:
         validator.assert_exc(address, 'address cannot be null')
         return request(
             self.config.host,
-            method='POST',
-            path=f'/apps/{address}/delete',
+            method='DELETE',
+            path=f'/apps/{address}',
             auth_opts=self.config.get_auth_opts(),
             debug=self.config.debug,
         )
