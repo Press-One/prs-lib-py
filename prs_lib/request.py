@@ -1,4 +1,4 @@
-import os
+import mimetypes
 from urllib.parse import quote_plus, urljoin, urlencode
 
 import prs_utility as utility
@@ -98,27 +98,14 @@ def request(
             and file_data.get('file')
             and file_data.get('filename')
     ):
-        ext = os.path.splitext(file_data['filename'])[-1].lower()
-        mimetype = None
-        if ext == '.md':
-            mimetype = 'text/markdown'
-        elif ext in ['.jpeg', '.jpg']:
-            mimetype = 'image/jpeg'
-        elif ext == '.png':
-            mimetype = 'image/png'
-        elif ext == '.gif':
-            mimetype = 'image/gif'
-        elif ext == '.svg':
-            mimetype = 'image/svg+xml'
-        elif ext == '.bmp':
-            mimetype = 'image/bmp'
-        elif ext == '.ico':
-            mimetype = 'image/vnd.microsoft.icon'
-        elif ext == '.webp':
-            mimetype = 'image/webp'
-        elif ext in ['.tif', '.tiff']:
-            mimetype = 'image/tiff'
-
+        filename = file_data['filename']
+        mimetype = mimetypes.guess_type(filename)[0]
+        if mimetype is None:
+            filename_lower = file_data['filename'].lower()
+            if filename_lower.endswith('.md'):
+                mimetype = 'text/markdown'
+            elif filename_lower.endswith('.webp'):
+                mimetype = 'image/webp'
         files = {
             file_data['field']: (
                 file_data['filename'], file_data['file'], mimetype

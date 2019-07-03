@@ -1,8 +1,24 @@
 from datetime import datetime
 
+from prs_lib import PRS
+import prs_utility as utility
+
 
 def now_str():
-    return datetime.now().isoformat()
+    return datetime.now().strftime('%Y%m%d%H%M%S%f')
+
+
+def get_client_buyer(env, debug=True):
+    private_key = utility.recover_private_key(
+        BUYER['keystore'], BUYER['password']
+    )
+    client = PRS({
+        'env': env,
+        'private_key': private_key,
+        'address': BUYER['address'],
+        'debug': debug
+    })
+    return client
 
 
 DEV_USER = BETA_USER = PROD_USER = {

@@ -1,3 +1,6 @@
+from . import get_client_buyer
+
+
 def test_get_subscription_json(client_with_auth):
     user_address = client_with_auth.config.address
     res = client_with_auth.subscription.get_subscription_json(user_address)
@@ -39,9 +42,11 @@ def test_get_recommendations(client_with_auth):
     assert res.status_code == 200
 
 
-def test_subscribe(client_with_auth, client_buyer):
+def test_subscribe(client_with_auth):
     # subscribe
-    buyer_address = client_buyer.config.address
+    env = client_with_auth.config.env
+    _client_buyer = get_client_buyer(env)
+    buyer_address = _client_buyer.config.address
     res = client_with_auth.subscription.subscribe(buyer_address)
     assert res.status_code == 200
 

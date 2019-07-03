@@ -1,11 +1,12 @@
-from . import now_str
+from . import now_str, get_client_buyer
 
 import prs_utility as utility
 
-DAPP_NAME = None
-APP_ADDRESS = None
-APP_PRIVATE_KEY = None
-CODE = None
+DAPP_NAME = {}
+APP_ADDRESS = {}
+APP_PRIVATE_KEY = {}
+KEY_PAIR = {}
+CODE = {}
 
 
 def get_dapp_name():
@@ -39,10 +40,11 @@ def create_dapp(c):
 
 
 def test_create_dapp(client_with_auth):
+    env = client_with_auth.config.env
     global DAPP_NAME, APP_ADDRESS
-    DAPP_NAME, APP_ADDRESS = create_dapp(client_with_auth)
+    DAPP_NAME[env], APP_ADDRESS[env] = create_dapp(client_with_auth)
     # check if exist by dapp name
-    res = client_with_auth.dapp.is_name_exist(DAPP_NAME)
+    res = client_with_auth.dapp.is_name_exist(DAPP_NAME[env])
     assert res.status_code == 200
     data = res.json()
     assert data and isinstance(data, dict)
@@ -50,6 +52,7 @@ def test_create_dapp(client_with_auth):
 
 
 def test_update_dapp(client_with_auth):
+    env = client_with_auth.config.env
     dapp_name = get_dapp_name()
     dapp = {
         'name': dapp_name,
@@ -58,27 +61,29 @@ def test_update_dapp(client_with_auth):
         'redirect_url': f'{client_with_auth.config.host}/auth',
     }
     global APP_ADDRESS
-    res = client_with_auth.dapp.update(APP_ADDRESS, dapp)
+    res = client_with_auth.dapp.update(APP_ADDRESS[env], dapp)
     data = res.json()
-    APP_ADDRESS = data['address']
-    assert APP_ADDRESS
+    APP_ADDRESS[env] = data['address']
+    assert APP_ADDRESS[env]
     assert data['name'] == dapp['name']
     assert data['description'] == dapp['description']
 
 
 def test_delete_dapp(client_with_auth):
+    env = client_with_auth.config.env
     global APP_ADDRESS
-    res = client_with_auth.dapp.delete(APP_ADDRESS)
-    assert res.status_code == 400
+    res = client_with_auth.dapp.delete(APP_ADDRESS[env])
+    assert res.status_code == 200
     data = res.json()
-    assert data['code'] == 'ERR_APP_CAN_NOT_BE_DELETED'
+    assert data and isinstance(data, dict)
 
 
 def test_recreate_dapp(client_with_auth):
+    env = client_with_auth.config.env
     global DAPP_NAME, APP_ADDRESS
-    DAPP_NAME, APP_ADDRESS = create_dapp(client_with_auth)
+    DAPP_NAME[env], APP_ADDRESS[env] = create_dapp(client_with_auth)
     # check if exist by dapp name
-    res = client_with_auth.dapp.is_name_exist(DAPP_NAME)
+    res = client_with_auth.dapp.is_name_exist(DAPP_NAME[env])
     assert res.status_code == 200
     data = res.json()
     assert data and isinstance(data, dict)
@@ -86,14 +91,15 @@ def test_recreate_dapp(client_with_auth):
 
 
 def test_get_dapp_by_address(client_with_auth):
+    env = client_with_auth.config.env
     global APP_ADDRESS
     # get dapp by address
-    res = client_with_auth.dapp.get_by_address(APP_ADDRESS)
+    res = client_with_auth.dapp.get_by_address(APP_ADDRESS[env])
     assert res.status_code == 200
     data = res.json()
     global APP_PRIVATE_KEY
-    APP_PRIVATE_KEY = data['privateKey']
-    assert APP_PRIVATE_KEY
+    APP_PRIVATE_KEY[env] = data['privateKey']
+    assert APP_PRIVATE_KEY[env]
 
 
 def test_get_apps(client_with_auth):
@@ -103,48 +109,48 @@ def test_get_apps(client_with_auth):
 
 
 def test_get_authorize_url(client_with_auth):
+    env = client_with_auth.config.env
     global APP_ADDRESS
-    auth_url = client_with_auth.dapp.get_authorize_url(APP_ADDRESS)
+    auth_url = client_with_auth.dapp.get_authorize_url(APP_ADDRESS[env])
     assert auth_url
 
 
-def test_web_authorize(client_buyer):
+def test_web_authorize(client_with_auth):
+    env = client_with_auth.config.env
+    _client_buyer = get_client_buyer(env)
     global APP_ADDRESS
-    res = client_buyer.dapp.web_authorize(APP_ADDRESS)
+    res = _client_buyer.dapp.web_authorize(APP_ADDRESS[env])
     assert res.status_code == 200
     data = res.json()
     global CODE
-    CODE = data['code']
-    assert CODE
+    CODE[env] = data['code']
+    assert CODE[env]
 
 
 def test_auth_by_code(client_with_auth):
+    env = client_with_auth.config.env
     global CODE, APP_ADDRESS, APP_PRIVATE_KEY
     res = client_with_auth.dapp.auth_by_code(
-        CODE, APP_ADDRESS, APP_PRIVATE_KEY
+        CODE[env], APP_ADDRESS[env], APP_PRIVATE_KEY[env]
     )
     assert res.status_code == 200
 
 
 def test_authenticate(client_with_auth):
+    env = client_with_auth.config.env
     global APP_ADDRESS, KEY_PAIR
-    KEY_PAIR = utility.create_key_pair()
+    KEY_PAIR[env] = utility.create_key_pair()
     # authenticate
-    res = client_with_auth.dapp.authenticate(APP_ADDRESS, KEY_PAIR['address'])
-    assert res.status_code == 200
-
-
-def test_deauthenticate(client_with_auth):
-    global APP_ADDRESS, KEY_PAIR
-    res = client_with_auth.dapp.deauthenticate(
-        APP_ADDRESS, KEY_PAIR['address']
+    res = client_with_auth.dapp.authenticate(
+        APP_ADDRESS[env], KEY_PAIR[env]['address']
     )
     assert res.status_code == 200
 
 
-def test_delete_dapp(client_with_auth):
-    global APP_ADDRESS
-    res = client_with_auth.dapp.delete(APP_ADDRESS)
-    assert res.status_code == 400
-    data = res.json()
-    assert data['code'] == 'ERR_APP_CAN_NOT_BE_DELETED'
+def test_deauthenticate(client_with_auth):
+    env = client_with_auth.config.env
+    global APP_ADDRESS, KEY_PAIR
+    res = client_with_auth.dapp.deauthenticate(
+        APP_ADDRESS[env], KEY_PAIR[env]['address']
+    )
+    assert res.status_code == 200
