@@ -32,7 +32,7 @@ class Contract:
         :param code: str
         """
         validator.assert_exc(code, 'code cannot be null')
-        code_hash = utility.keccak256(code)
+        code_hash = utility.keccak256(text=code)
         block_data = {'file_hash': code_hash}
         auth_opts = self.config.get_auth_opts()
         private_key = auth_opts.get('private_key')

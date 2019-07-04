@@ -12,7 +12,7 @@ def hash_request(path, payload):
     sorted_qs = utility.get_sorted_qs(payload or {})
     sep = '&' if sorted_qs else ''
     data = f'{prefix}{sep}{sorted_qs}'
-    return utility.keccak256(data)
+    return utility.keccak256(text=data)
 
 
 def sign_request(path, payload, private_key):

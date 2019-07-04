@@ -167,7 +167,7 @@ class File:
         meta = self.omit_sign_data(meta or dict())
         auth_opts = self.config.get_auth_opts()
         private_key, token = auth_opts['private_key'], auth_opts['token']
-        file_hash = utility.keccak256(data['buffer'])
+        file_hash = utility.keccak256(primitive=data['buffer'])
         block_data = {'file_hash': file_hash}
         sign = None
         if private_key:

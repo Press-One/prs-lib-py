@@ -19,7 +19,7 @@ def sign_by_token(data, token, host):
 
 
 def hash_by_password(email, password):
-    return utility.keccak256(f'{password}{email}')
+    return utility.keccak256(text=f'{password}{email}')
 
 
 def hash_by_filename(filename):
@@ -27,11 +27,14 @@ def hash_by_filename(filename):
     # so, load all data to memory, maybe OOM
     with open(filename, 'rb') as fp:
         data = fp.read()
-        sha = utility.keccak256(data)
+        sha = utility.keccak256(primitive=data)
         return sha
 
 
 def hash_by_readable_stream(stream):
     data = stream.read()
-    sha = utility.keccak256(data)
+    if isinstance(data, str):
+        sha = utility.keccak256(text=data)
+    else:
+        sha = utility.keccak256(primitive=data)
     return data, sha
