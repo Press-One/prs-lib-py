@@ -148,11 +148,11 @@ class File:
             debug=self.config.debug,
         )
 
-    def sign_by_buffer(self, data, meta=None):
+    def sign_by_buffer(self, data, meta=None, alg='keccak256'):
         """
         :param data: dict
             {
-                'buffer': 'file buffer',
+                'buffer': b'file content',
                 'filename': str,
                 'title': str,
                 'source': str,
@@ -164,10 +164,14 @@ class File:
         """
         required = ['buffer', 'filename', 'title']
         validator.check_dict_and_assert('data', data, required)
+        validator.assert_exc(
+            isinstance(data['buffer'], bytes),
+            "the type of data['buffer'] must be `bytes`"
+        )
         meta = self.omit_sign_data(meta or dict())
         auth_opts = self.config.get_auth_opts()
         private_key, token = auth_opts['private_key'], auth_opts['token']
-        file_hash = utility.keccak256(primitive=data['buffer'])
+        file_hash = utility.hash_text(data['buffer'].decode(), alg=alg)
         block_data = {'file_hash': file_hash}
         sign = None
         if private_key:

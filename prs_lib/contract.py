@@ -27,12 +27,12 @@ class Contract:
             debug=self.config.debug,
         )
 
-    def create(self, code):
+    def create(self, code, alg='keccak256'):
         """
         :param code: str
         """
         validator.assert_exc(code, 'code cannot be null')
-        code_hash = utility.keccak256(text=code)
+        code_hash = utility.hash_text(code, alg=alg)
         block_data = {'file_hash': code_hash}
         auth_opts = self.config.get_auth_opts()
         private_key = auth_opts.get('private_key')

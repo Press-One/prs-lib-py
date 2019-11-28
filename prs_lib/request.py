@@ -7,12 +7,12 @@ import requests
 __all__ = ['hash_request', 'sign_request', 'get_auth_header', 'request']
 
 
-def hash_request(path, payload):
+def hash_request(path, payload, alg='keccak256'):
     prefix = 'path={}'.format(quote_plus(path))
     sorted_qs = utility.get_sorted_qs(payload or {})
     sep = '&' if sorted_qs else ''
     data = f'{prefix}{sep}{sorted_qs}'
-    return utility.keccak256(text=data)
+    return utility.hash_text(data, alg=alg)
 
 
 def sign_request(path, payload, private_key):
