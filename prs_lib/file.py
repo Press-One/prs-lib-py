@@ -148,7 +148,7 @@ class File:
             debug=self.config.debug,
         )
 
-    def sign_by_buffer(self, data, meta=None, alg='keccak256'):
+    def sign_by_buffer(self, data, meta=None, hash_alg='keccak256'):
         """
         :param data: dict
             {
@@ -171,7 +171,7 @@ class File:
         meta = self.omit_sign_data(meta or dict())
         auth_opts = self.config.get_auth_opts()
         private_key, token = auth_opts['private_key'], auth_opts['token']
-        file_hash = utility.hash_text(data['buffer'].decode(), alg=alg)
+        file_hash = utility.hash_text(data['buffer'].decode(), hash_alg=hash_alg)
         block_data = {'file_hash': file_hash}
         sign = None
         if private_key:

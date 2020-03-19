@@ -18,20 +18,20 @@ def sign_by_token(data, token, host):
     )
 
 
-def hash_by_password(email, password, alg='keccak256'):
-    return utility.hash_text(f'{password}{email}', alg=alg)
+def hash_by_password(email, password, hash_alg='keccak256'):
+    return utility.hash_text(f'{password}{email}', hash_alg=hash_alg)
 
 
-def hash_by_filename(filename, alg='keccak256'):
+def hash_by_filename(filename, hash_alg='keccak256'):
     # FIXME: eth_utils.keccak do not support `update`
     # so, load all data to memory, maybe OOM
     with open(filename, 'r') as fp:
         data = fp.read()
-        return utility.hash_text(data, alg=alg)
+        return utility.hash_text(data, hash_alg=hash_alg)
 
 
-def hash_by_readable_stream(stream, alg='keccak256'):
+def hash_by_readable_stream(stream, hash_alg='keccak256'):
     data = stream.read()
     _data = data.decode() if isinstance(data, bytes) else data
-    _hash = utility.hash_text(_data, alg=alg)
+    _hash = utility.hash_text(_data, hash_alg=hash_alg)
     return data, _hash

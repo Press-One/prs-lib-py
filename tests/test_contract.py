@@ -6,13 +6,14 @@ def test_get_templates(client_with_auth):
 
 
 def create_contract(c):
+    env = c.config.env
     code = (
         'PRSC Ver 0.1\n'
         'Name 购买授权\n'
         'Desc 这是一个\\n测试合约\n'
         f'Receiver {c.config.address}\n'
-        'License usage1 CNB:0.001 Terms: 这是个人使用条款，禁止\\n商业应用。\n'
-        'License usage2 CNB:0.002 Terms: 这是商业使用条款，允许\\n修改和复制。\n'
+        f'License usage1 {"PRS" if env == "prod" else "CNB"}:0.001 Terms: 这是个人使用条款，禁止\\n商业应用。\n'
+        f'License usage2 {"PRS" if env == "prod" else "CNB"}:0.002 Terms: 这是商业使用条款，允许\\n修改和复制。\n'
     )
     res = c.contract.create(code)
     data = res.json()

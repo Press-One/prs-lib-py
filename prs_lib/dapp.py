@@ -133,9 +133,10 @@ class Dapp:
         validator.assert_exc(address, 'address cannot be null')
         return f'{self.config.host}/developer/apps/{address}/authorize'
 
-    def web_authorize(self, app_address):
+    def web_authorize(self, app_address, hash_alg='keccak256'):
         """
         :param app_address: str, app address
+        :param hash_alg: str
         """
         validator.assert_exc(app_address, 'app_address cannot be null')
         validator.assert_exc(
@@ -146,7 +147,7 @@ class Dapp:
         private_key = auth_opts['private_key']
         token = auth_opts['token']
         if private_key:
-            authorize_opts['type'] = 'email'
+            authorize_opts['signLocation'] = 'client'
             res = request(
                 self.config.host,
                 method='GET',
@@ -159,10 +160,11 @@ class Dapp:
                 'app_address': app_address,
                 'auth_address': auth_address,
                 'authorized': True,
-            }, private_key)
+            }, private_key, hash_alg)
             data = {
                 'authAddress': auth_address,
                 'signature': sign['signature'],
+                'hashAlg': hash_alg,
             }
             request(
                 self.config.host,
@@ -174,7 +176,7 @@ class Dapp:
             )
             authorize_opts['authAddress'] = auth_address
         elif token:
-            authorize_opts['type'] = 'phone'
+            authorize_opts["signLocation"] = "server"
         return request(
             self.config.host,
             method='POST',
@@ -206,52 +208,11 @@ class Dapp:
             debug=self.config.debug
         )
 
-    def authenticate(self, app_address, auth_address):
+    def deauthenticate(self, app_address, auth_address, hash_alg='keccak256'):
         """
         :param app_address: str
         :param auth_address: str
-        """
-        validator.assert_exc(app_address, 'app_address cannot be null')
-        auth_opts = self.config.get_auth_opts()
-        private_key, token = auth_opts['private_key'], auth_opts['token']
-        data = {
-            'appAddress': app_address,
-        }
-        if auth_address:
-            block_data = {
-                'app_provider': 'press.one',
-                'app_address': app_address,
-                'auth_address': auth_address,
-                'authorized': True,
-            }
-            sign = None
-            if private_key:
-                sign = utility.sign_block_data(block_data, private_key)
-            elif token:
-                res = sign_utility.sign_by_token(
-                    block_data, token, self.config.host
-                )
-                sign = res.json()
-            address = utility.sig_to_address(sign['hash'], sign['signature'])
-            data.update({
-                'userAddress': address,
-                'authAddress': auth_address,
-                'authorized': True,
-                'signature': sign['signature'],
-            })
-        return request(
-            self.config.host,
-            method='POST',
-            path=f'/apps/{app_address}/authenticate',
-            data=data,
-            auth_opts=auth_opts,
-            debug=self.config.debug
-        )
-
-    def deauthenticate(self, app_address, auth_address):
-        """
-        :param app_address: str
-        :param auth_address: str
+        :param hash_alg: str
         """
         validator.assert_exc(app_address, 'app_address cannot be null')
         auth_opts = self.config.get_auth_opts()
@@ -268,7 +229,7 @@ class Dapp:
             }
             sign = None
             if private_key:
-                sign = utility.sign_block_data(block_data, private_key)
+                sign = utility.sign_block_data(block_data, private_key, hash_alg)
             elif token:
                 res = sign_utility.sign_by_token(
                     block_data, token, self.config.host
